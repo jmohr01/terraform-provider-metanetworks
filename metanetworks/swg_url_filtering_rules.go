@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	swgUrlFilteringRulessEndpoint string = "/v1/threat_categories"
+	swgUrlFilteringRulessEndpoint string = "/v1/url_filtering_rules"
 )
 
 // SwgUrlFilteringRules ...
@@ -15,7 +15,7 @@ type SwgUrlFilteringRules struct {
 	Description                string   `json:"description"`
 	Action                     string   `json:"action"`
 	AdvancedThreatProtection   bool     `json:"advanced_threat_protection,omitempty" type:"bool"`
-	Enabled                    bool     `json:"enabled,omitempty" type:"bool"`
+	Enabled                    bool     `json:"enabled" type:"bool"`
 	Priority                   int      `json:"priority"`
 	ThreatCategory             string   `json:"threat_category,omitempty"`
 	ExemptSources              []string `json:"exempt_sources,omitempty"`

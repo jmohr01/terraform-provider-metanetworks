@@ -26,6 +26,7 @@ func resourceSwgUrlFilteringRules() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 			"exempt_sources": {
 				Type:     schema.TypeSet,
