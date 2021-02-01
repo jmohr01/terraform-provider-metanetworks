@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceNativeService() *schema.Resource {
+func resourceDevice() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -19,6 +19,14 @@ func resourceNativeService() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
+			},
+			"owner_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"platform": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"tags": {
 				Type:     schema.TypeMap,
@@ -51,37 +59,41 @@ func resourceNativeService() *schema.Resource {
 				Computed: true,
 			},
 		},
-		Create: resourceNativeServiceCreate,
-		Read:   resourceNativeServiceRead,
-		Update: resourceNativeServiceUpdate,
-		Delete: resourceNativeServiceDelete,
+		Create: resourceDeviceCreate,
+		Read:   resourceDeviceRead,
+		Update: resourceDeviceUpdate,
+		Delete: resourceDeviceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 	}
 }
 
-func resourceNativeServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceDeviceCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	enabled := d.Get("enabled").(bool)
+	ownerID := d.Get("owner_id").(string)
+	platform := d.Get("platform").(string)
 
 	networkElement := NetworkElement{
 		Name:        name,
 		Description: description,
 		Enabled:     &enabled,
+		OwnerID:     ownerID,
+		Platform:    platform,
 	}
-	var newNativeService *NetworkElement
-	newNativeService, err := client.CreateNetworkElement(&networkElement)
+	var newDevice *NetworkElement
+	newDevice, err := client.CreateNetworkElement(&networkElement)
 	if err != nil {
 		return err
 	}
 
-	d.SetId(newNativeService.ID)
+	d.SetId(newDevice.ID)
 
-	err = nativeServiceToResource(d, newNativeService)
+	err = deviceToResource(d, newDevice)
 	if err != nil {
 		return err
 	}
@@ -90,10 +102,10 @@ func resourceNativeServiceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceNativeServiceRead(d, m)
+	return resourceDeviceRead(d, m)
 }
 
-func resourceNativeServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceDeviceRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 
 	networkElement, err := client.GetNetworkElement(d.Id())
@@ -102,7 +114,7 @@ func resourceNativeServiceRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	err = nativeServiceToResource(d, networkElement)
+	err = deviceToResource(d, networkElement)
 	if err != nil {
 		return err
 	}
@@ -110,25 +122,29 @@ func resourceNativeServiceRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNativeServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceDeviceUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	enabled := d.Get("enabled").(bool)
+	ownerID := d.Get("owner_id").(string)
+	platform := d.Get("platform").(string)
 
 	networkElement := NetworkElement{
 		Name:        name,
 		Description: description,
 		Enabled:     &enabled,
+		OwnerID:     ownerID,
+		Platform:    platform,
 	}
-	var updatedNativeService *NetworkElement
-	updatedNativeService, err := client.UpdateNetworkElement(d.Id(), &networkElement)
+	var updatedDevice *NetworkElement
+	updatedDevice, err := client.UpdateNetworkElement(d.Id(), &networkElement)
 	if err != nil {
 		return err
 	}
 
-	err = nativeServiceToResource(d, updatedNativeService)
+	err = deviceToResource(d, updatedDevice)
 	if err != nil {
 		return err
 	}
@@ -137,10 +153,10 @@ func resourceNativeServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceNativeServiceRead(d, m)
+	return resourceDeviceRead(d, m)
 }
 
-func resourceNativeServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceDeviceDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 
 	err := client.DeleteNetworkElement(d.Id())
@@ -151,10 +167,12 @@ func resourceNativeServiceDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func nativeServiceToResource(d *schema.ResourceData, m *NetworkElement) error {
+func deviceToResource(d *schema.ResourceData, m *NetworkElement) error {
 	d.Set("name", m.Name)
 	d.Set("description", m.Description)
 	d.Set("enabled", m.Enabled)
+	d.Set("owner_id", m.OwnerID)
+	d.Set("platform", m.Platform)
 	d.Set("aliases", m.Aliases)
 	d.Set("created_at", m.CreatedAt)
 	d.Set("dns_name", m.DNSName)
