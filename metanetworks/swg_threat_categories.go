@@ -26,7 +26,7 @@ type SwgThreatCategories struct {
 // GetSwgThreatCategories ...
 func (c *Client) GetSwgThreatCategories(swgThreatCategoriesID string) (*SwgThreatCategories, error) {
 	var swgThreatCategories SwgThreatCategories
-	err := c.Read(swgThreatCategoriessEndpoint+"/"+swgThreatCategoriesID, &swgThreatCategories)
+	err := c.Read(swgThreatCategoriessEndpoint+"/"+swgThreatCategoriesID+"?expand=true", &swgThreatCategories)
 	if err != nil {
 		return nil, err
 	}
